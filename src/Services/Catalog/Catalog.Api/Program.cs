@@ -1,9 +1,8 @@
 using BuildingBlocks.Behaviors;
+using BuildingBlocks.Exceptions.Handler;
 using Carter;
 using FluentValidation;
 using Marten;
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +23,8 @@ builder.Services.AddMarten(options =>
 
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
+builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -39,24 +40,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapCarter();
-app.UseExceptionHandler(exceptionHandlerApp =>
-{
-    exceptionHandlerApp.Run(async ctx =>
-    {
-        var exception = ctx.Features.Get<IExceptionHandlerFeature>()?.Error;
-        if (exception is null)
-            return;
-        var problemDetails = new ProblemDetails
-        {
-            Title = exception.Message,
-            Status = StatusCodes.Status500InternalServerError,
-            Detail = exception.StackTrace
-        };
-        var logger = ctx.RequestServices.GetRequiredService<ILogger<Program>>();
-        logger.LogError(exception, exception.Message);
-        ctx.Response.StatusCode = StatusCodes.Status500InternalServerError;
-        ctx.Response.ContentType = "application/problem+json";
-        await ctx.Response.WriteAsJsonAsync(problemDetails);
-    });
-});
+
+app.UseExceptionHandler(options => { });
+
 app.Run();

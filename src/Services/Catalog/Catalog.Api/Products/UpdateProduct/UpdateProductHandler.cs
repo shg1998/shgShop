@@ -22,7 +22,7 @@ namespace Catalog.Api.Products.UpdateProduct
             logger.LogInformation("UpdateProductHandler.Handle called with {@Command}", command);
             var product = await session.LoadAsync<Product>(command.Id, cancellationToken);
             if (product == null)
-                throw new ProductNotFoundException();
+                throw new ProductNotFoundException(command.Id);
             product.Name = command.Name;
             product.Categories = command.Category;
             product.Description = command.Description;
