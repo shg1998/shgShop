@@ -6,7 +6,7 @@ namespace Basket.Api.Data
 {
     public class BasketRepository(IDocumentSession session): IBasketRepository
     {
-        public async Task<ShoppingCard> GetBasket(string username, CancellationToken cancellationToken = default)
+        public async Task<ShoppingCard?> GetBasket(string username, CancellationToken cancellationToken = default)
         {
             var basket = await session.LoadAsync<ShoppingCard>(username, cancellationToken);
             return basket ?? throw new BasketNotFoundException(username);

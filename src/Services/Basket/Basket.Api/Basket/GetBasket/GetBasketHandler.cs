@@ -6,7 +6,7 @@ namespace Basket.Api.Basket.GetBasket
 {
     public record GetBasketQuery(string username) : IQuery<GetBasketResult>;
 
-    public record GetBasketResult(ShoppingCard Card);
+    public record GetBasketResult(ShoppingCard? Card);
 
     public class GetBasketHandler(IBasketRepository repository): IQueryHandler<GetBasketQuery,GetBasketResult>
     {
