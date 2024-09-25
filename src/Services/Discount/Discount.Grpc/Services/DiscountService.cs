@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Discount.Grpc.Services
 {
-    public class DiscountService(DiscountDbContext dbContext, ILogger<DiscountService> logger): DiscountProtoService.DiscountProtoServiceBase
+    public class DiscountService(DiscountDbContext dbContext, ILogger<DiscountService> logger) : DiscountProtoService.DiscountProtoServiceBase
     {
         public override async Task<CouponModel> GetDiscount(GetDiscountRequest request, ServerCallContext context)
         {
@@ -16,23 +16,46 @@ namespace Discount.Grpc.Services
                 Amount = 0,
                 Description = "NotFound Product"
             };
+            logger.LogInformation("Discount is retrieved for ProductName: {productName}", request.ProductName);
             var response = coupon.Adapt<CouponModel>();
             return response;
         }
 
-        public override Task<CouponModel> CreateDiscount(CreateDiscountRequest request, ServerCallContext context)
+        public override async Task<CouponModel> CreateDiscount(CreateDiscountRequest request, ServerCallContext context)
         {
-            return base.CreateDiscount(request, context);
+            var coupon = request.Coupon.Adapt<Coupon>();
+            if (coupon is null)
+                throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid request object"));
+            await dbContext.Coupons.AddAsync(coupon, CancellationToken.None);
+            await dbContext.SaveChangesAsync(CancellationToken.None);
+            var couponModel = coupon.Adapt<CouponModel>();
+            return couponModel;
         }
 
-        public override Task<CouponModel> UpdateDiscount(UpdateDiscountRequest request, ServerCallContext context)
+        public override async Task<CouponModel> UpdateDiscount(UpdateDiscountRequest request, ServerCallContext context)
         {
-            return base.UpdateDiscount(request, context);
+            var coupon = request.Coupon.Adapt<Coupon>();
+            if (coupon is null)
+                throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid request object"));
+
+            dbContext.Coupons.Update(coupon);
+            await dbContext.SaveChangesAsync(CancellationToken.None);
+            var couponModel = coupon.Adapt<CouponModel>();
+            return couponModel;
         }
 
-        public override Task<DeleteDiscountResponse> DeleteDiscount(DeleteDiscountRequest request, ServerCallContext context)
+        public override async Task<DeleteDiscountResponse> DeleteDiscount(DeleteDiscountRequest request, ServerCallContext context)
         {
-            return base.DeleteDiscount(request, context);
+
+            var coupon = await dbContext.Coupons.FirstOrDefaultAsync(s => s.ProductName == request.ProductName);
+            if (coupon is null)
+                throw new RpcException(new Status(StatusCode.NotFound, "NotFound"));
+            dbContext.Coupons.Remove(coupon);
+            await dbContext.SaveChangesAsync();
+            return new DeleteDiscountResponse
+            {
+                Success = true
+            };
         }
     }
 }
