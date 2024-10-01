@@ -1,8 +1,6 @@
 ﻿using BuildingBlocks.CQRS;
 using Catalog.Api.Models;
-using FluentValidation;
 using Marten;
-using Marten.Schema;
 
 namespace Catalog.Api.Products.CreateProduct
 {

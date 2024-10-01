@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace Ordering.Domain.Abstractions
+﻿namespace Ordering.Domain.Abstractions
 {
     public abstract class Aggregate<TId>: Entity<TId>, IAggregate<TId>
     {

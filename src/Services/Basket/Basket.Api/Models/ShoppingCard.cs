@@ -1,6 +1,4 @@
-﻿using Marten.Schema;
-
-namespace Basket.Api.Models
+﻿namespace Basket.Api.Models
 {
     public class ShoppingCard
     {
