@@ -5,6 +5,9 @@ using Ordering.Domain.ValueObjects;
 
 namespace Ordering.Domain.Models
 {
+    // reach domain model in ddd concept: 
+    // we have order aggregate includes Order, Address, OrderItem and Payment!
+    // in this aggregate , the aggregate root is Order:)
     public class Order : Aggregate<OrderId>
     {
         private readonly List<OrderItem> _orderItems = [];
